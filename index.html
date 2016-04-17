@@ -9,13 +9,71 @@
     <script src="js/bootstrap.min.js"></script>
 </head>
 <body>
-<div class="container">
-    <div class="row text-center">
-        <h2 class="">Current Weather</h2>
+    <div class="container">
+        <div class="row text-center">
+            <h2 class="">Current Weather</h2>
+        </div>
+        <div class="row text-center">
+            <p>Please enter your zip code to get the weather report for your area.</p>
+        </div>
+        <div class="row">
+            <form class="text-center">
+                <label for="zip">Enter Your Zip</label>
+                <input id="zip" name="zip" type="text" placeholder="29403" value="29403">
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+        <div class="row text-center displayData">
+            <img src="" alt="" class="weather-pic">
+            <p>City Name: <strong><span class="name"></span></strong></p>
+            <p>Current Weather: <strong><span class="description"></span></strong></p>
+            <p>Current Temp: <strong><span class="currentTemp"></span></strong> &#8457</p>
+            <p>Temp High: <strong><span class="tempHigh"></span></strong> &#8457</p>
+            <p>Temp Low: <strong><span class="tempLow"></span></strong> &#8457</p>
+        </div>
     </div>
-    <div class="row text-center">
-        <p>Please enter your zip code to get weather report for your area.</p>
-    </div>
-</div>
+    <script>
+        // magic.js
+        $(document).ready(function() {
+
+            // process the form
+            $('form').submit(function(event) {
+
+                // get the form data
+                // there are many ways to get this data using jQuery (you can use the class or id also)
+                var formData = {
+                    'zip': $('form :input').val()
+                };
+                console.log("FormData: " + JSON.stringify(formData));
+                var apiUrl = 'http://api.openweathermap.org/data/2.5/weather?zip=' + formData.zip + ',usa&APPID=4bddd5de1b77a28536d1ac62145e71ed';
+                // process the form
+                $.ajax({
+                            type        : 'GET', // define the type of HTTP verb we want to use (POST for our form)
+                            url         : apiUrl, // the url where we want to POST
+//                            data        : formData, // our data object
+                            dataType    : 'json', // what type of data do we expect back from the server
+                            encode          : true
+                        })
+                        // using the done promise callback
+                        .done(function(data) {
+
+                            // log data to the console so we can see
+                            console.log(data);
+                            $('.displayData img').attr("src","http://openweathermap.org/img/w/" + data.weather[0].icon + ".png");
+                            $('.displayData .name').text(data.name);
+                            $('.displayData .description').text(data.weather[0].description);
+                            $('.displayData .currentTemp').text(Math.floor((data.main.temp - 273.15)*1.8 + 32));
+                            $('.displayData .tempHigh').text(Math.floor((data.main.temp_max - 273.15)*1.8 + 32));
+                            $('.displayData .tempLow').text(Math.floor((data.main.temp_min - 273.15)*1.8 + 32));
+
+                            // here we will handle errors and validation messages
+                        });
+
+                // stop the form from submitting the normal way and refreshing the page
+                event.preventDefault();
+            });
+
+        });
+    </script>
 </body>
 </html>
